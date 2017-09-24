@@ -1,8 +1,11 @@
 import pprint
+import tempfile
+import os
 
 import requests
 
 import nb.post
+import nb.munge
 
 
 class MediumUser:
@@ -104,3 +107,30 @@ class MediumUser:
             )
         resp = self.assert_response(response, 201)
         return resp["url"], resp["md5"]
+
+    def convert_upload_md(self, file: str):
+        content, equations = nb.munge.load_content_file(file)
+
+        # Convert equations -> png and upload
+        medium_links = {}
+        for number, eq in equations.items():
+            png_data = nb.latex.render_in_tex(eq)
+            with tempfile.TemporaryDirectory() as td:
+                png_temp = os.path.join(td, "equation_" + str(number) + ".png")
+                with open(png_temp, "wb") as f:
+                    f.write(png_data)
+                url, _ = self.upload_image(png_temp)
+                medium_links[number] = url
+
+        # Replace document links with medium ones
+        replaced_content = nb.munge.replace_content_placeholders(content, medium_links)
+        p = nb.post.Post(
+            title="Test With Image",
+            content=replaced_content,
+            contentFormat="markdown",
+            canonicalUrl="http://foourl.com",
+            tags=["footag1", "footag2"],
+            publishStatus="draft",
+        )
+
+        self.new_post(p)

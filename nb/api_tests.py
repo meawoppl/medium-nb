@@ -51,3 +51,11 @@ def test_upload_image():
     nose.tools.assert_is_instance(image_url, str)
     nose.tools.assert_in("https://", image_url)
     nose.tools.assert_is_instance(hash_like, str)
+
+
+def test_do_it_all():
+    import os
+    test_md_path = os.path.join(os.path.dirname(nb.__file__), "example_testdata/posts/example.md")
+
+    user = nb.api_testlib.get_test_api()
+    user.convert_upload_md(test_md_path)

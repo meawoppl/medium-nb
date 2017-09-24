@@ -4,6 +4,10 @@ import uuid
 import nb.latex
 
 
+def eq_number_to_placeholder(id: int) -> str:
+    return "EQUATION_PLACEHOLDER_" + str(id)
+
+
 def load_content_file(path: str):
     """
     Read a path, replace equation tags
@@ -38,7 +42,7 @@ def load_content_file(path: str):
                 break
             equation_content += line_content
             line_number += 1
-        eq_id = "EQUATION_PLACEHOLDER_" + str(equation_count)
+        eq_id = eq_number_to_placeholder(equation_count)
         content += eq_id + "\n"
         equations[equation_count] = equation_content.strip()
         equation_count += 1
@@ -48,6 +52,7 @@ def load_content_file(path: str):
 
 def replace_content_placeholders(content: str, ids_to_url: dict):
     new_content = str(content)
-    for anchor, url in ids_to_url.items():
-        new_content.replace(anchor, "![{anchor}]({url})".format(anchor=anchor, url=url))
+    for id, url in ids_to_url.items():
+        placeholder_str = eq_number_to_placeholder(id)
+        new_content = new_content.replace(placeholder_str, "![equation_{id}]({url})".format(id=id, url=url))
     return new_content

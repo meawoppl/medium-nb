@@ -1,3 +1,5 @@
+import tempfile
+
 import nose.tools
 
 import nb.post
@@ -27,3 +29,13 @@ def test_post_init_invalid():
 
 def test_post_init_valid():
     VALID_POST_INSTANCE.validate_post()
+
+
+def test_post_folder_util():
+    with tempfile.TemporaryDirectory() as td:
+        with nose.tools.assert_raises(AssertionError):
+            nb.post.Post.from_folder(td)
+
+        VALID_POST_INSTANCE.to_folder(td)
+        post = nb.post.Post.from_folder(td)
+        post.validate_post()

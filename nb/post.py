@@ -34,12 +34,14 @@ class Post:
     def __init__(          # NOQA
             self,
             title=None,
-            contentFormat=None,
             content=None,
             canonicalUrl=None,
             tags=None,
-            publishStatus=None):
+            publishStatus=None,
+            contentFormat="markdown"):
 
+        # We only support markdown for now
+        assert contentFormat == "markdown", contentFormat
         # NB: non-PEP8 names consistant with JSON request fmt for sanity
         self.title = title
         self.contentFormat = contentFormat
@@ -55,7 +57,7 @@ class Post:
         cont_path = os.path.join(path, CONTENT_FILENAME)
         return meta_path, cont_path
 
-    def to_post_folder(self, path: str):
+    def to_folder(self, path: str):
         self.validate_post()
         meta_json = self.to_post_json()
         content = meta_json.pop("content")
@@ -63,13 +65,13 @@ class Post:
         meta_path, cont_path = self._get_folder_paths(path)
 
         with open(meta_path, "w") as f:
-            json.dump(f, meta_json)
+            json.dump(meta_json, f)
 
         with open(cont_path, "w") as f:
             f.write(content)
 
     @classmethod
-    def from_post_folder(cls, path: str):
+    def from_folder(cls, path: str):
         assert_is_valid_post_folder(path)
 
         meta_path, cont_path = cls._get_folder_paths(path)
@@ -92,14 +94,18 @@ class Post:
         )
 
     def to_post_json(self):
-        return dict(
+        ret = dict(
             title=self.title,
-            contentFormat=self.content_format,
+            contentFormat=self.contentFormat,
             content=self.content,
-            canonicalUrl=self.canonical_url,
-            tags=self.tags,
-            publishStatus=self.publish_status,
+            publishStatus=self.publishStatus,
         )
+        # Optinal fields
+        if self.canonicalUrl is not None:
+            ret["canonicalUrl"] = self.canonicalUrl
+        if self.tags is not None:
+            ret["tags"] = self.tags
+        return ret
 
     def validate_post(self):
         assert self.title is not None

@@ -23,6 +23,8 @@ def test_post_folder_util():
         with nose.tools.assert_raises(AssertionError):
             nb.post.Post.from_folder(td)
 
-        nb.post_testlib.VALID_POST_INSTANCE.to_folder(td)
-        post = nb.post.Post.from_folder(td)
-        post.validate_post()
+        post1 = nb.post_testlib.get_valid_post_instance()
+        post1.to_folder(td)
+
+        post2 = nb.post.Post.from_folder(td)
+        post2.validate_post()

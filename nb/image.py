@@ -21,4 +21,6 @@ class MediumImage:
         self.mime = EXTENSION_TO_MIME[ext.lower()]
         with open(path, "rb") as f:
             self.content = f.read()
-        self.md5 = hashlib.md5(self._content).hex_digest()
+        self.md5 = hashlib.md5(self.content).hexdigest()
+
+        self.url = None

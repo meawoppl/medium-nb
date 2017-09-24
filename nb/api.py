@@ -50,16 +50,57 @@ class MediumUser:
             "https://api.medium.com/v1/users/" + self.id + "/publications")
 
     def new_post(self, post: nb.post.Post):
+        """
+        This creates a new post on the Medium website
+        it ruturns the post's id feild and additionally
+        sets it on the post object passed in.
+
+        Posts if a post has an existing .id it will raise
+        an AssertionError.  To update a post use update_post()
+        """
         post.validate_post()
-        return self._do_authed_put(
+        posting_response_json = self._do_authed_put(
             "https://api.medium.com/v1/users/" + self.id + "/posts",
             post.to_json()
         )
+        post.id = posting_response_json["id"]
+        return post.id
+
+    def delete_post(self, postid: str):
+        raise NotImplementedError("Medium does not implement?!?!?")
+
+        path = "/p/" + postid
+        response = requests.delete(
+            "https://medium.com" + path,
+            headers={
+                "Authorization": "Bearer " + self._key,
+                "path": path,
+                "referer": "https://medium.com/me/stories/drafts"
+            },
+        )
+        self.assert_response(response, 200)
 
     def update_post(self, post: nb.post.Post):
-        pass
+        raise NotImplementedError("Medium does not implement?!?!?")
 
-    def upload_image(self, image: nb.image.MediumImage):
-        self._do_authed_put(
-
+        posting_json = post.to_json()
+        posting_json["id"] = post.id
+        response = requests.post(
+            "https://api.medium.com/v1/users/" + self.id + "/posts",
+            headers={"Authorization": "Bearer " + self._key},
+            json=posting_json
         )
+        self.assert_response(response)
+
+    def upload_image(self, filepath: str):
+        with open(filepath, "rb") as f:
+            response = requests.post(
+                "https://api.medium.com/v1/images",
+                headers={
+                    "Authorization": "Bearer " + self._key,
+                },
+                files={
+                    "image": (filepath, f, "image/png")
+                }
+            )
+        return self.assert_response(response, 201)

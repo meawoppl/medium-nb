@@ -6,8 +6,6 @@ import nb.api_testlib
 import nb.post
 import nb.post_testlib
 
-import nb.image_tests
-
 
 def test_get_user_info():
     user = nb.api_testlib.get_test_api()
@@ -45,13 +43,11 @@ def test_publish_post():
 #     user.update_post(post)
 
 def test_upload_image():
-    img = nb.image_tests.load_test_image()
+    import os
+    test_image_path = os.path.join(os.path.dirname(nb.__file__), "testdata/16x16.png")
     user = nb.api_testlib.get_test_api()
-    resp = user.upload_image("nb/testdata/16x16.png")
-    import pprint
-    pprint.pprint(resp)
+    image_url, hash_like = user.upload_image(test_image_path)
 
-    import base64
-    print(base64.standard_b64decode(resp["md5"]))
-
-    1/0
+    nose.tools.assert_is_instance(image_url, str)
+    nose.tools.assert_in("https://", image_url)
+    nose.tools.assert_is_instance(hash_like, str)

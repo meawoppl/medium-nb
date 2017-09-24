@@ -3,7 +3,6 @@ import pprint
 import requests
 
 import nb.post
-import nb.image
 
 
 class MediumUser:
@@ -92,7 +91,7 @@ class MediumUser:
         )
         self.assert_response(response)
 
-    def upload_image(self, filepath: str):
+    def upload_image(self, filepath: str) -> tuple:
         with open(filepath, "rb") as f:
             response = requests.post(
                 "https://api.medium.com/v1/images",
@@ -103,4 +102,5 @@ class MediumUser:
                     "image": (filepath, f, "image/png")
                 }
             )
-        return self.assert_response(response, 201)
+        resp = self.assert_response(response, 201)
+        return resp["url"], resp["md5"]

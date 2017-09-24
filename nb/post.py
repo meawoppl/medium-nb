@@ -33,6 +33,7 @@ class Post:
 
     def __init__(          # NOQA
             self,
+            id=None,
             title=None,
             content=None,
             canonicalUrl=None,
@@ -43,6 +44,7 @@ class Post:
         # We only support markdown for now
         assert contentFormat == "markdown", contentFormat
         # NB: non-PEP8 names consistant with JSON request fmt for sanity
+        self.id = id
         self.title = title
         self.contentFormat = contentFormat
         self.content = content
@@ -59,7 +61,7 @@ class Post:
 
     def to_folder(self, path: str):
         self.validate_post()
-        meta_json = self.to_post_json()
+        meta_json = self.to_json()
         content = meta_json.pop("content")
 
         meta_path, cont_path = self._get_folder_paths(path)
@@ -83,7 +85,7 @@ class Post:
         return cls(**meta)
 
     @classmethod
-    def from_post_json(cls, json: dict):
+    def from_json(cls, json: dict):
         return cls(
             json["title"],
             json["contentFormat"],
@@ -93,7 +95,7 @@ class Post:
             json["publishStatus"],
         )
 
-    def to_post_json(self):
+    def to_json(self):
         ret = dict(
             title=self.title,
             contentFormat=self.contentFormat,

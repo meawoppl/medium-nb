@@ -3,6 +3,9 @@ import nose.tools
 import nb.api
 import nb.api_testlib
 
+import nb.post
+import nb.post_testlib
+
 
 def test_get_user_info():
     user = nb.api_testlib.get_test_api()
@@ -20,3 +23,9 @@ def test_get_my_posts():
     posts = user.get_my_posts()
     nose.tools.assert_is_instance(posts, list)
 
+    for post_json in posts:
+        print(nb.post.Post.from_json(post_json))
+
+def test_publish_post():
+    user = nb.api_testlib.get_test_api()
+    user.new_post(nb.post_testlib.VALID_POST_INSTANCE)

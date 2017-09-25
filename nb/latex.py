@@ -54,7 +54,7 @@ def render_in_tex(latex: str) -> bytes:
         assert_call("pdfcrop", pdf_file, pdf_file)
         assert_call(
             "convert",
-            "-density", "300",
+            "-density", "450",
             "-quality", "100",
             pdf_file,
             os.path.join(td, "base.png")

@@ -147,6 +147,8 @@ class MediumUser:
 
         # Replace document links with medium ones
         replaced_content = nb.munge.replace_content_placeholders(content, medium_links)
+
+        # Sync the post
         p = nb.post.Post(
             title="MediumMathSync:" + time.ctime(),
             content=replaced_content,

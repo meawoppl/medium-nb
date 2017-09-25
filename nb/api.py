@@ -1,5 +1,6 @@
 import pprint
 import tempfile
+import time
 import os
 
 import requests
@@ -147,11 +148,11 @@ class MediumUser:
         # Replace document links with medium ones
         replaced_content = nb.munge.replace_content_placeholders(content, medium_links)
         p = nb.post.Post(
-            title="Test With Image",
+            title="MediumMathSync:" + time.ctime(),
             content=replaced_content,
             contentFormat="markdown",
-            canonicalUrl="http://foourl.com",
-            tags=["footag1", "footag2"],
+            canonicalUrl="https://github.com/meawoppl/medium-nb",
+            tags=[],
             publishStatus="draft",
         )
 

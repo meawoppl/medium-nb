@@ -55,7 +55,9 @@ def test_upload_image():
 
 def test_do_it_all():
     import os
-    test_md_path = os.path.join(os.path.dirname(nb.__file__), "example_testdata/posts/example.md")
+    test_md_path = os.path.join(
+        os.path.dirname(nb.__file__),
+        "example_testdata/posts/math-in-medium.md")
 
     user = nb.api_testlib.get_test_api()
     user.convert_upload_md(test_md_path)

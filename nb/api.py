@@ -7,6 +7,20 @@ import requests
 import nb.post
 import nb.munge
 
+EXTENSION_TO_MIME = {
+    ".png": "image/png",
+    ".jpeg": "image/jpeg",
+    ".jpg": "image/jpeg",
+    ".tiff": "image/tiff",
+    ".tif": "image/tiff",
+}
+
+
+def filename_to_mime(filename: str) -> str:
+    _, extension = os.path.splitext(filename)
+    assert extension.lower() in EXTENSION_TO_MIME, extension
+    return EXTENSION_TO_MIME[extension.lower()]
+
 
 class MediumUser:
     def __init__(self, api_key: str):
@@ -23,7 +37,6 @@ class MediumUser:
                     pprint.pformat(dict(response.headers.items())),
                     response.raw.read()
                 )
-            print(formatted_message)
             raise AssertionError(formatted_message)
 
         return response.json()["data"]
@@ -36,7 +49,6 @@ class MediumUser:
         return self.assert_response(response)
 
     def _do_authed_put(self, resource: str, json):
-        pprint.pprint((resource, json))
         response = requests.post(
             resource,
             headers={"Authorization": "Bearer " + self._key},
@@ -95,6 +107,12 @@ class MediumUser:
         self.assert_response(response)
 
     def upload_image(self, filepath: str) -> tuple:
+        """
+        Upload the file found at "filepath", return a 2-tuple with:
+         - Medium image url
+         - Medium image "md5" hash.
+        """
+        mime = filename_to_mime(filepath)
         with open(filepath, "rb") as f:
             response = requests.post(
                 "https://api.medium.com/v1/images",
@@ -102,11 +120,19 @@ class MediumUser:
                     "Authorization": "Bearer " + self._key,
                 },
                 files={
-                    "image": (filepath, f, "image/png")
+                    "image": (filepath, f, mime)
                 }
             )
         resp = self.assert_response(response, 201)
         return resp["url"], resp["md5"]
+
+    def upload_image_bytes(self, image: bytes, filename: str):
+        with tempfile.TemporaryDirectory() as td:
+            img_temp = os.path.join(td, filename)
+            with open(img_temp, "wb") as f:
+                f.write(image)
+
+            return self.upload_image(img_temp)
 
     def convert_upload_md(self, file: str):
         content, equations = nb.munge.load_content_file(file)
@@ -115,12 +141,8 @@ class MediumUser:
         medium_links = {}
         for number, eq in equations.items():
             png_data = nb.latex.render_in_tex(eq)
-            with tempfile.TemporaryDirectory() as td:
-                png_temp = os.path.join(td, "equation_" + str(number) + ".png")
-                with open(png_temp, "wb") as f:
-                    f.write(png_data)
-                url, _ = self.upload_image(png_temp)
-                medium_links[number] = url
+            url, _ = self.upload_image_bytes(png_data, "equation_" + str(number) + ".png")
+            medium_links[number] = url
 
         # Replace document links with medium ones
         replaced_content = nb.munge.replace_content_placeholders(content, medium_links)

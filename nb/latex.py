@@ -19,7 +19,11 @@ LATEX_FOOTER = r"""
 
 
 def assert_call(*args):
-    call_code = subprocess.check_call(args)
+    call_code = subprocess.check_call(
+        args,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
     assert call_code == 0, call_code
 
 

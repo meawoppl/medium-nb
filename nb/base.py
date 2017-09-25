@@ -56,7 +56,7 @@ def load_credentials(path: str) -> str:
     """
     with open(path) as f:
         obj = json.load(f)
-    assert len(obj) == 1 and "api_key" in obj, pprint.pfortmat(obj)
+    assert len(obj) == 1 and "api_key" in obj, pprint.pformat(obj)
 
 
 def save_post_meta(path: str, post_id: str):
